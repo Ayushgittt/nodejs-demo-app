@@ -8,19 +8,21 @@ This project is a **Node.js-based web scraper** that uses **Puppeteer** to extra
 
 ## 📁 Project Structure
 
-├── scrape.js # Puppeteer script for scraping product data
+├── scrape.js             # Puppeteer script for scraping product data
 
-├── server.py # Flask server to expose scraped data via API
+├── server.py             # Flask server to expose scraped data via API
 
-├── Dockerfile # Multi-stage Dockerfile for Node + Python app
+├── scrape.test.js        # Jest test file to validate scraping output
 
-├── package.json # Node.js dependencies
+├── Dockerfile            # Multi-stage Dockerfile for Node + Python app
 
-├── requirements.txt # Python dependencies (Flask)
+├── package.json          # Node.js dependencies
 
-├── scraped_data.json # Output JSON from scraper
+├── requirements.txt      # Python dependencies (Flask)
 
-├── .github/workflows/ # GitHub Actions CI/CD workflows
+├── scraped_data.json     # Output JSON from scraper
+
+├── .github/workflows/    # GitHub Actions CI/CD workflows
 
 
 ---
@@ -58,7 +60,7 @@ The CI/CD pipeline is fully automated with **GitHub Actions**, and includes:
 - ✨ **Multi-stage Docker build** for minimal, secure runtime image
 - 🔒 **Trivy + Nodejsscan** integrated for security scanning
 - 🛠️ **Jest testing** for automated validation
-- 🚀 **DockerHub deployment** via CI/CD on push to `main`
+- 🚀 **Building and DockerHub deployment** via CI/CD on push to `main`
 - ⚠️ CI ignores `README.md`-only commits for performance
 
 ---
@@ -69,3 +71,15 @@ The CI/CD pipeline is fully automated with **GitHub Actions**, and includes:
 docker build \
   --build-arg SCRAPE_URL="https://webscraper.io/test-sites/e-commerce/allinone/computers/laptops" \
   -t yourusername/web-scrapper_docker .
+
+🚀 Run the Container
+
+docker run -p 5000:5000 yourusername/web-scrapper_docker
+
+This will:
+
+Perform web scraping during build (via SCRAPE_URL)
+
+Start a Flask server inside the container
+
+Serve the scraped data as JSON at http://localhost:5000
