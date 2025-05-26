@@ -87,3 +87,8 @@ jobs:
         run: |
           nodejsscan -d . -o sast-report.json
           cat sast-report.json
+      - name: Upload SAST Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: sast-report
+          path: sast-report.json
