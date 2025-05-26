@@ -9,11 +9,17 @@ This project is a **Node.js-based web scraper** that uses **Puppeteer** to extra
 ## 📁 Project Structure
 
 ├── scrape.js # Puppeteer script for scraping product data
+
 ├── server.py # Flask server to expose scraped data via API
+
 ├── Dockerfile # Multi-stage Dockerfile for Node + Python app
+
 ├── package.json # Node.js dependencies
+
 ├── requirements.txt # Python dependencies (Flask)
+
 ├── scraped_data.json # Output JSON from scraper
+
 ├── .github/workflows/ # GitHub Actions CI/CD workflows
 
 
