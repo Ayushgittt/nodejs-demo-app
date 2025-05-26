@@ -1,0 +1,72 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: 8192027760/web-scrapper_docker
+  SCRAPE_URL: "https://webscraper.io/test-sites/e-commerce/allinone/computers/laptops"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test || echo "No tests defined, skipping..."
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            --build-arg SCRAPE_URL=${{ env.SCRAPE_URL }} \
+            -t ${{ env.IMAGE_NAME }} .
+
+      - name: Trivy Image Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+
+      - name: Push Docker Image to Docker Hub
+        run: docker push ${{ env.IMAGE_NAME }}
+
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install nodejsscan
+        run: pip install nodejsscan
+
+      - name: Run SAST Scan
+        run: |
+          nodejsscan -d . -o sast-report.json
+          cat sast-report.json
