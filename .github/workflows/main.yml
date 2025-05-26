@@ -20,10 +20,10 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: '.'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          
+          trivy-config: trivy.yaml
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
   test:
     runs-on: ubuntu-latest
     steps:
