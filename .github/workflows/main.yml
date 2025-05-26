@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+        - README.md
 
 env:
   IMAGE_NAME: 8192027760/web-scrapper_docker
@@ -15,16 +17,40 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
       - name: Trivy File System Scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
           trivy-config: trivy.yaml
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
+  sast:
+    needs: trivy-fs-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install nodejsscan
+        run: pip install nodejsscan
+
+      - name: Run SAST Scan
+        run: |
+          nodejsscan -d . -o sast-report.json
+          cat sast-report.json
+
+      - name: Upload SAST Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-report
+          path: sast-report.json
+
   test:
+    needs: sast
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -73,22 +99,3 @@ jobs:
 
       - name: Push Docker Image to Docker Hub
         run: docker push ${{ env.IMAGE_NAME }}
-
-  sast:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Install nodejsscan
-        run: pip install nodejsscan
-
-      - name: Run SAST Scan
-        run: |
-          nodejsscan -d . -o sast-report.json
-          cat sast-report.json
-      - name: Upload SAST Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: sast-report
-          path: sast-report.json
